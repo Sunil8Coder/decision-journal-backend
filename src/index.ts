@@ -1,14 +1,31 @@
-import { renderHtml } from "./renderHtml";
+import type { Env } from './env';
+import { decisionRoutes } from './routes/decision.routes';
+import { analyticsRoutes } from './routes/analytics.routes';
+import { logRequest } from './utils/logger';
 
 export default {
-	async fetch(request, env) {
-		const stmt = env.DB.prepare("SELECT * FROM comments LIMIT 3");
-		const { results } = await stmt.all();
+  async fetch(req: Request, env: Env): Promise<Response> {
+    const start = Date.now();
+    const requestId = crypto.randomUUID();
+    const { pathname } = new URL(req.url);
+    let res: Response | null = null;
 
-		return new Response(renderHtml(JSON.stringify(results, null, 2)), {
-			headers: {
-				"content-type": "text/html",
-			},
-		});
-	},
-} satisfies ExportedHandler<Env>;
+    try {
+      res =
+        (await decisionRoutes(req, env, pathname)) ||
+        (await analyticsRoutes(req, env, pathname)) ||
+        new Response('Not Found', { status: 404 });
+
+      return res;
+    } finally {
+      await logRequest(env, {
+        requestId,
+        method: req.method,
+        path: pathname,
+        status: res?.status ?? 500,
+        duration: Date.now() - start,
+        ip: req.headers.get('cf-connecting-ip') ?? undefined,
+      });
+    }
+  },
+};
