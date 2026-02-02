@@ -1,6 +1,7 @@
 import type { Env } from './env';
 import { decisionRoutes } from './routes/decision.routes';
 import { analyticsRoutes } from './routes/analytics.routes';
+import { authRoutes } from './routes/auth.routes'; // ✅ NEW
 import { logRequest } from './utils/logger';
 
 export default {
@@ -12,6 +13,7 @@ export default {
 
     try {
       res =
+        (await authRoutes(req, env, pathname)) ||
         (await decisionRoutes(req, env, pathname)) ||
         (await analyticsRoutes(req, env, pathname)) ||
         new Response('Not Found', { status: 404 });
