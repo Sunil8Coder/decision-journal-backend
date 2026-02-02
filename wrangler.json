@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "decision-journal-backend",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "dbf91527-f858-49d1-a8bf-5fb146d239eb",
+			"database_name": "decision-journal-db"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
